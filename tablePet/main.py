@@ -1,6 +1,6 @@
 # *_* coding : UTF-8 *_*
 # author  ：  Leemamas
-# 开发时间  ：  2021/5/20  3:06
+# 开发时间  ：  2021/5/28  2:11
 
 import sys
 from PyQt5.QtGui import *
@@ -10,8 +10,7 @@ from PyQt5.QtWidgets import *
 class TablePet(QWidget):
     def __init__(self):
         super(TablePet, self).__init__()
-        self.initUi()
-        self.tray()
+
 
         self.is_follow_mouse = False
         self.mouse_drag_pos = self.pos()
@@ -20,15 +19,48 @@ class TablePet(QWidget):
         self.timer.timeout.connect(self.randomAct)
         self.timer.start(100)
 
+        ##僵尸形态
+        self.sharp=1
+        ##皇帝的新衣
+        self.clothes = ''
+        self.clothes_key = 0
+        self.wardrobe(self.sharp)
+
+        self.initUi()
+        self.tray()
+
+
+    ##衣柜
+    def wardrobe(self,key):
+
+        default = 'source\Zombie\Zombie_'
+        battle = 'source\ConeheadZombie\ConeheadZombie_'
+        if key == 0:
+            self.clothes=default
+            ##TODO 根据文件数自动获取
+            self.clothes_key=21
+        else:
+            self.clothes=battle
+            self.clothes_key=20
+
+
+    ##变身
+    def transformation(self):
+        if self.sharp==0:
+            self.wardrobe(1)
+            self.sharp=1
+        else:
+            self.wardrobe(0)
+            self.sharp=0
 
     def randomAct(self):
         # 读取图片不同的地址，实现动画效果
-        if self.key<21:
+        if self.key<self.clothes_key:
             self.key+=1
         else:
             self.key=0
 
-        self.pic_url = 'source\Zombie\Zombie_' + str(self.key) + '.png'
+        self.pic_url = self.clothes + str(self.key) + '.png'
         self.pm = QPixmap(self.pic_url)
         if not self.is_follow_mouse:
             # 实现行进效果
@@ -49,7 +81,7 @@ class TablePet(QWidget):
         # self.setWindowTitle('mypet')
         self.lbl = QLabel(self)
         self.key=0
-        self.pic_url='source\Zombie\Zombie_'+str(self.key)+'.png'
+        self.pic_url=self.clothes+str(self.key)+'.png'
         self.pm = QPixmap(self.pic_url)
         self.lbl.setPixmap(self.pm)
 
@@ -66,8 +98,10 @@ class TablePet(QWidget):
         tp=QSystemTrayIcon(self)
         tp.setIcon(QIcon('source\Zombie\Zombie_0.png'))
         ation_quit= QAction('QUIT', self, triggered=self.quit)
+        transformation= QAction('transformation', self, triggered=self.transformation)
         tpMenu=QMenu(self)
         tpMenu.addAction(ation_quit)
+        tpMenu.addAction(transformation)
         tp.setContextMenu(tpMenu)
         tp.show()
 
